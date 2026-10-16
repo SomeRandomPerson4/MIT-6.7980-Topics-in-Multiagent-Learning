@@ -374,14 +374,6 @@ The next plots illustrate the behavior of OGD and MWU in a simple $2 times 2$ ga
     text-width: 36%,
   )
 ]
-
-#lec_bibliography("meta/refs.bib")
-
-#changelog[
-  - 2025-10-05: Fixed typos (thanks George Cao!).
-  - 2025-11-30: Fixed typo in summation $t -> tau$ (thanks Sophie Wang!).
-]
-
 == Exercises
 
 #exercise[Continous-time Regret Bound][
@@ -453,3 +445,75 @@ $ F_eta (bold(r)^((t))) = F_eta (bold(r)^((t-1))+bold(g)^((t))) - ⟨bold(x)^((t
 as at $c=0$, we have that $f'(0) = ⟨bold(x)^((t)), bold(g)^((t))⟩$.
 
 Summing, this clearly suffices.]
+
+#exercise[Convergence of Fictitious Play][
+  We work towards showing that in two-player zero sum games, fictitious play converges to a nash equilibrium. //#citep(<Robinson1951>)
+
+  Consider a zero-sum two player game under fictitious play. Let our payoff matrix be $A in RR^(m times n)$, where the row player maximizes and the column player minimizes, and refer to rows and columns of $A$ via $A_(i dot)$ and $A_(dot j)$.
+
+  Consider pairs of sequences of $n$ and $m$ dimensional vectors $ ({U_i}_(i >= 0), {V}_(j >= 0)) $ with the min term of $U_0$ and the max term of $V_0$ equal, and $U_(t+1) = U_(t) + A_(i dot)$ and $V_(t+1) = V_(t) + A_(dot j)$, where $i$ and $j$ are the indices of the maximal and minimal coordinates of $V_t$ and $U_t$ respectively (ties broken arbitrarily).
+
+  Lastly, let $v$ be the nash equilibrium value of the game.
+
+1. Prove that
+$ max V_(t) >= min U_(t), $ where we are refering to the maxima and minima of the coordinates of the vectors.
+2. Call a row/column $i$ eligible in interval $[s, s+t]$ if the $i$th coordinate is maximal in $V_r$/the $i$th coordinate is minimal in $U_r$ for some $r in [s, s+t]$. If every row and column is eligible in this interval, show that 
+$ max V_(s+t) - min U_(s+t) <= 4a t, $ where $a = max_(i, j) A_(i j)$.
+
+_Hint:_ Try bound $max U_(s+t) - min U_(s+t)$ and $max V_(s+t) - min V_(s+t)$
+
+3. Prove via induction on $m$ and $n$ that for all $epsilon > 0$, there exists a $t_0$ such that $ max V_t - min U_t < epsilon t $ for every $t > t_0$.
+
+_Hint:_ Strong induct on the submatrices of $A$, and consider what happens when we not all rows and columns are eligible.
+
+4. Show that $ lim_(t -> infinity) (min U_t)/t = lim_(t -> infinity) (max V_t)/t = v, $ showing all Fictitious play converges to a Nash equilibrium.
+]
+
+#solution[
+  1. Induct on $t$, with base case $t=0$ trivial.
+
+  Assume that the maximal coordinate of $V_t$ is its $i$th coordinate, and the minimal coordinate of $U_t$ is its $j$th coordinate. Then, both of these coordinates have $a_(i j)$ added to them in $V_(t+1)$ and $U_(t+1)$.
+
+  Noting the maximal coordinate of $V_(t+1)$ is at least the $i$th coordinate and the minimal coordinate of $U_(t+1)$ is at most its $j$th coordinate, we are done.
+
+  2.  We first show $ max U_(s+t) - min U_(s+t) <= 2a t, $ and 
+  $ max V_(s+t) - min V_(s+t) <= 2a t. $
+
+  Suppose that $j$ is the maximal coordinate of $U_(s+t)$. Let $r in [s, t]$ be a value for which $j$ was the minimal coordinate in $U_r$. 
+  
+  Then the $j$ coordinate of $U_(s+t)$ is at most the $j$ coordinate of $U_r$ plus $a t$, while the minimum coordinate is at least the $j$ coordinate of $U_r$ minus $a t$. 
+  
+  This shows $max U_(s+t) - min U_(s+t) <= 2a t,$ and easily also shows $max V_(s+t) - min V_(s+t) <= 2a t.$
+
+  Now, we claim $min V_(r) <= max U_(r)$, for al $r$, which would suffice.
+
+  Indeed, note that we can write $V_r$ as $V_0 + r A y$ and $U_r$ as $U_0 + r A^top x$, where $y$ and $x$ are the row and column distribution vectors. Then, noting $min A y <= max x^top A$, we can get $min V_(r) <= max U_(r)$, and finish.
+  
+  3. Clearly, this is true if $m = n = 1$. Now, strong induct.
+
+  Pick $t^*$ so that for any submatrix $A'$ of $A$ and pair of vector sequences $(U', V')$ satisfying our conditions, $max V'_t - min U'_t < 1/2 epsilon t$ for all $t >= t^*$.
+
+  Suppose that the $k$th row is not eligible in the interval $[s, s+t^*]$. Then, we can make a vector system $(U', V')$ for the matrix found by deleting the $k$th row from $A$ by taking $ U'_(t) = U_(s+t) + (max V_s - min U_s) bold(1)$ and $ V'_(t) = V(s+t)$ without its $k$th coordinate. 
+  
+  Then, whatever rows and columns we add to $U_(s+t)$ and $V_(s+t)$ to get $U_(s+t+1)$ and $V_(s+t+1)$, we add those corresponding rows and columns from $A$ with its $k$th row removed to $U'_t$ and $V'_t$, as the $k$th row was ineligible. As such, $(U', V')$ is a vector system.
+
+  Thus, $ max V_(s+t^*) - min U_(s+t^*) - (max V_(s) - min U_(s)) = max V'_(t^*) - min U'_(t^*) < 1/2 epsilon t^* . $
+
+  Similarly, if any column is not eligible, we get the same condition.
+
+  Now, for any arbitrarily large $t$, by breaking $[0, t]$ up into intervals of size $t^*$ and doing casework on whether or not every row and column is eligible, we can force $max V_t - min U_t < epsilon t.$
+
+  4. From parts $1$ and $3$ together, we know that these limits must be equal. 
+  
+  Now, note that $U_t - U_0$ is the sum of rows played, and $V_t - V_0$ is the sum of columns played. As such, dividing both by $t$ gives strategy vectors. Clearly then, the minimum value of $U_t - U_0$ is at most $v t$, and the maximum value of $V_t - V_0$ is at least $v t$.
+  
+  This suffices.
+]
+
+#lec_bibliography("meta/refs.bib")
+
+#changelog[
+  - 2025-10-05: Fixed typos (thanks George Cao!).
+  - 2025-11-30: Fixed typo in summation $t -> tau$ (thanks Sophie Wang!).
+]
+
