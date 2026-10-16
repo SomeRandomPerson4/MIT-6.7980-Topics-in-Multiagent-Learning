@@ -381,3 +381,75 @@ The next plots illustrate the behavior of OGD and MWU in a simple $2 times 2$ ga
   - 2025-10-05: Fixed typos (thanks George Cao!).
   - 2025-11-30: Fixed typo in summation $t -> tau$ (thanks Sophie Wang!).
 ]
+
+== Exercises
+
+#exercise[Continous-time Regret Bound][
+Suppose we're playing a continuous-time game where at each time $t$, our probability of picking action $a$ is
+$ x_(a)(t) = exp(eta integral_0^t g_(a)(s) dif s) / (sum_(b in A) exp(eta integral_0^t g_(b)(s) dif s)), $
+Prove that the player's regret
+$ "Reg"(T) := max_(a in A) integral_0^T g_(a)(t) dif t - integral_0^T ip(bold(x)(t), bold(g)(t)) dif t $
+is at most $frac(log |A|, eta)$. 
+]
+
+#solution[][First, let us define the individual regret functions
+$ r_(a)(t) = integral_0^t (g_(a)(s) - ip(bold(x)(s), bold(g)(s))) dif s $
+for each $a in A$, and consider the soft-max function
+$ F_(eta)(bold(r)) := 1/eta log sum_(a in A) e^(eta r_(a)). $
+Since
+$ e^(eta max_(a in A) r_(a)) <= sum_(a in A) e^(eta r_(a)), $
+taking logarithms and dividing by $eta > 0$ gives
+$ max_(a in A) r_(a) <= F_(eta)(bold(r)). $
+
+Now, observe that from the chain rule, the partial derivatives of $F_(eta)$ with respect to the $r_(a)$'s are just
+$ (partial F_(eta))/(partial r_(a))(bold(r)(t)) = e^(eta r_(a)(t)) / (sum_(b in A) e^(eta r_(b)(t))) = x_(a)(t). $
+
+Moreover, note that 
+$ d/(d t) r_(a)(t) &= d/(d t) integral_0^t (g_(a)(s) - ip(bold(x)(s), bold(g)(s))) dif s = g_(a)(t) - ip(bold(x)(t), bold(g)(t)). $
+so
+$ dot(bold(r))(t) = bold(g)(t) - ip(bold(x)(t), bold(g)(t)) bold(1), $
+where $bold(1)$ is the vector of all ones.
+
+As such, by using the chain rule again, we see that
+$ d/(d t) F_(eta)(bold(r)(t)) &= ip(bold(x)(t), bold(g)(t) - ip(bold(x)(t), bold(g)(t)) bold(1)) \
+&= ip(bold(x)(t), bold(g)(t)) (1 - sum_(a in A) x_(a)(t)) = 0. $
+Thus, the potential remains constant as time progresses!
+
+Since our individual regret functions are zero at time zero, we get
+$ "Reg"(T) = max_(a in A) r_(a)(T) <= F_(eta)(bold(r)(T)) = F_(eta)(bold(0)) = frac(log |A|, eta), $
+so we are done.]
+
+#exercise[Weaker Version of Discrete Regret Bound][
+Prove that in a discrete game, the player's regret is at most $frac(log |A|, eta) + eta sum_(t=1)^T norm(bold(g)^((t)))_infinity^2$
+]
+_Hint:_ Use the same function from the continuous case, and try show its change each step is bounded.
+
+#solution[][Again, define the functions
+$ r_(a)^((t)) = sum_(s=1)^t (g_(a)^((s)) - ip(bold(x)^((s)), bold(g)^((s)))), quad F_(eta)(bold(r)) = 1/eta log sum_(a in A) e^(eta r_(a)). $
+Note that as we saw in the continuous case, we get the following inequality and equation:
+$ max_(a) r_(a) <= F_(eta)(bold(r)), quad F_(eta)(bold(0)) = frac(log |A|, eta). $
+
+Unfortunately, $F$ is not constant in this discrete case. As such, we instead bound $F_eta (bold(r)^((t)))-F_eta (bold(r)^((t-1))).$
+
+Note that 
+$ F_eta (bold(r)^((t))) = F_eta (bold(r)^((t-1))+bold(g)^((t))) - ⟨bold(x)^((t)), bold(g)^((t))⟩, $
+as subtracting a constant amount from $F$'s input it equivalent to subtracting that amount from its output.
+
+Now, to bound $ F_eta (bold(r)^((t-1))+bold(g)^((t))) - F_eta (bold(r)^((t-1))), $ 
+consider the function
+$ f(c) = F_eta (bold(r)^((t-1))+c dot bold(g)^((t))) = 1/eta log sum_(a in A) e^(eta (r^((t-1))_a + c g^((t))_a)). $
+
+By the chain rule, its first derivative is just 
+$ f'(c) = (sum_(a in A) g^((t))_a e^(eta (r^((t-1))_a + c g^((t))_a)))/(sum_(a in A) e^(eta (r^((t-1))_a + c g^((t))_a))). $
+
+Then, we can compute its second derivative to be at most the derivative of the numerator over the denominator, which is just
+$ eta [ (sum_(a in A) g^((t))_a  dot g^((t))_a e^(eta (r^((t-1))_a + c g^((t))_a)))/(sum_(a in A) e^(eta (r^((t-1))_a + c g^((t))_a))) ] <= eta ||bold(g)||^2_infinity $
+
+Now, note that by Taylor's inequality,
+$ f(1) <= f(0) + f'(0) + 1/2 max_(c in [0, 1]) f''(c). $
+
+Thus,
+$ F_eta (bold(r)^((t))) = F_eta (bold(r)^((t-1))+bold(g)^((t))) - ⟨bold(x)^((t)), bold(g)^((t))⟩ <= F_eta (bold(r)^((t-1))) + eta/2 norm(bold(g)^((t)))_infinity^2, $
+as at $c=0$, we have that $f'(0) = ⟨bold(x)^((t)), bold(g)^((t))⟩$.
+
+Summing, this clearly suffices.]
